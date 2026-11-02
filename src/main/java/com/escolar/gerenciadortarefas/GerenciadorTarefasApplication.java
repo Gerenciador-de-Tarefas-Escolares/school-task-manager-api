@@ -1,13 +1,13 @@
-package com.escolar.tarefasgerenciador;
+package com.escolar.gerenciadortarefas;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class TarefasgerenciadorApplication {
+public class GerenciadorTarefasApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TarefasgerenciadorApplication.class, args);
+		SpringApplication.run(GerenciadorTarefasApplication.class, args);
 	}
 
 }

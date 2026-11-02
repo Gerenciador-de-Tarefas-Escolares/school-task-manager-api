@@ -1,9 +1,9 @@
-package com.escolar.tarefasgerenciador.controller;
+package com.escolar.gerenciadortarefas.controller;
 
-import com.escolar.tarefasgerenciador.dto.LoginDTO;
-import com.escolar.tarefasgerenciador.dto.RegistroDTO;
-import com.escolar.tarefasgerenciador.model.Usuario;
-import com.escolar.tarefasgerenciador.service.AutentificacaoService;
+import com.escolar.gerenciadortarefas.dto.LoginDTO;
+import com.escolar.gerenciadortarefas.dto.RegistroDTO;
+import com.escolar.gerenciadortarefas.model.Usuario;
+import com.escolar.gerenciadortarefas.service.AutentificacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 

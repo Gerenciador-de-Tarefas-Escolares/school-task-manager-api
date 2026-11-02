@@ -1,8 +1,9 @@
-package com.escolar.tarefasgerenciador.controller;
+package com.escolar.gerenciadortarefas.controller;
 
-import com.escolar.tarefasgerenciador.model.Tarefa;
-import com.escolar.tarefasgerenciador.repository.TarefaRepository;
-import com.escolar.tarefasgerenciador.repository.UsuarioRepository;
+import com.escolar.gerenciadortarefas.model.Tarefa;
+import com.escolar.gerenciadortarefas.model.Usuario;
+import com.escolar.gerenciadortarefas.repository.TarefaRepository;
+import com.escolar.gerenciadortarefas.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -23,7 +24,7 @@ public class TarefaController {
 
     @PostMapping
     public Tarefa cadastrar(@RequestBody Tarefa tarefa, @RequestParam Long usuarioId) {
-        var usuario = usuarioRepository.findById(usuarioId)
+        Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
         tarefa.setUsuario(usuario);
         if (tarefa.getConcluida() == null) tarefa.setConcluida(false);

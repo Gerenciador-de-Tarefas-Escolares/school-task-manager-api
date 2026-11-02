@@ -1,4 +1,4 @@
-package com.escolar.tarefasgerenciador.dto;
+package com.escolar.gerenciadortarefas.dto;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

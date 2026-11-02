@@ -1,4 +1,4 @@
-package com.escolar.tarefasgerenciador.model;
+package com.escolar.gerenciadortarefas.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

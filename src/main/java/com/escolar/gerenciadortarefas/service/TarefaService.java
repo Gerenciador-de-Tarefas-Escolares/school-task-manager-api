@@ -1,7 +1,7 @@
-package com.escolar.tarefasgerenciador.service;
+package com.escolar.gerenciadortarefas.service;
 
-import com.escolar.tarefasgerenciador.model.Tarefa;
-import com.escolar.tarefasgerenciador.repository.TarefaRepository;
+import com.escolar.gerenciadortarefas.model.Tarefa;
+import com.escolar.gerenciadortarefas.repository.TarefaRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;

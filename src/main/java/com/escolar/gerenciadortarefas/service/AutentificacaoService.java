@@ -1,7 +1,7 @@
-package com.escolar.tarefasgerenciador.service;
+package com.escolar.gerenciadortarefas.service;
 
-import com.escolar.tarefasgerenciador.model.Usuario;
-import com.escolar.tarefasgerenciador.repository.UsuarioRepository;
+import com.escolar.gerenciadortarefas.model.Usuario;
+import com.escolar.gerenciadortarefas.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;

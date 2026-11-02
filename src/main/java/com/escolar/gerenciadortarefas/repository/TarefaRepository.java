@@ -1,6 +1,6 @@
-package com.escolar.tarefasgerenciador.repository;
+package com.escolar.gerenciadortarefas.repository;
 
-import com.escolar.tarefasgerenciador.model.Tarefa;
+import com.escolar.gerenciadortarefas.model.Tarefa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

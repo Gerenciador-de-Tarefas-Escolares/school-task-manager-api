@@ -1,10 +1,10 @@
-package com.escolar.tarefasgerenciador;
+package com.escolar.gerenciadortarefas;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class TarefasgerenciadorApplicationTests {
+class GerenciadorTarefasApplicationTests {
 
 	@Test
 	void contextLoads() {
