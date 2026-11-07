@@ -12,8 +12,8 @@ public class TarefaService {
 
     private final TarefaRepository tarefaRepository;
 
-    public List<Tarefa> listarTodos() {
-        return tarefaRepository.findAll();
+    public List<Tarefa> listarPorUsuario(Long usuarioId) {
+        return tarefaRepository.findByUsuarioId(usuarioId);
     }
 
     public Tarefa buscarPorId(Long id) {

@@ -14,6 +14,9 @@ public class AutentificacaoService {
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public Usuario registrar(Usuario usuario) {
+        if (usuarioRepository.findByEmail(usuario.getEmail()).isPresent()) {
+            throw new RuntimeException("Este e-mail já está registrado");
+        }
         usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         return usuarioRepository.save(usuario);
     }
@@ -26,5 +29,15 @@ public class AutentificacaoService {
             throw new RuntimeException("Senha Incorreta");
         }
         return usuario;
+    }
+
+    public Usuario processarLoginGoogle(String email, String nome) {
+        return usuarioRepository.findByEmail(email).orElseGet(() -> {
+            Usuario novoUsuario = new Usuario();
+            novoUsuario.setEmail(email);
+            novoUsuario.setNome(nome);
+            novoUsuario.setSenha(passwordEncoder.encode(java.util.UUID.randomUUID().toString()));
+            return usuarioRepository.save(novoUsuario);
+        });
     }
 }
