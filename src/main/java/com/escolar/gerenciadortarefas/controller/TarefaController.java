@@ -2,10 +2,14 @@ package com.escolar.gerenciadortarefas.controller;
 
 import com.escolar.gerenciadortarefas.model.Tarefa;
 import com.escolar.gerenciadortarefas.model.Usuario;
-import com.escolar.gerenciadortarefas.repository.TarefaRepository;
 import com.escolar.gerenciadortarefas.repository.UsuarioRepository;
+import com.escolar.gerenciadortarefas.service.TarefaService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -14,39 +18,37 @@ import java.util.List;
 @RequiredArgsConstructor
 public class TarefaController {
 
-    private final TarefaRepository tarefaRepository;
+    private final TarefaService tarefaService;
     private final UsuarioRepository usuarioRepository;
 
     @GetMapping
-    public List<Tarefa> listar() {
-        return tarefaRepository.findAll();
+    public ResponseEntity<List<Tarefa>> listar(@AuthenticationPrincipal UserDetails userDetails) {
+        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        List<Tarefa> tarefas = tarefaService.listarPorUsuario(usuario.getId());
+        return ResponseEntity.ok(tarefas);
     }
 
     @PostMapping
-    public Tarefa cadastrar(@RequestBody Tarefa tarefa, @RequestParam Long usuarioId) {
-        Usuario usuario = usuarioRepository.findById(usuarioId)
+    public ResponseEntity<Tarefa> cadastrar(@RequestBody Tarefa tarefa, @AuthenticationPrincipal UserDetails userDetails) {
+        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
         tarefa.setUsuario(usuario);
-        if (tarefa.getConcluida() == null) tarefa.setConcluida(false);
-        return tarefaRepository.save(tarefa);
+        Tarefa novaTarefa = tarefaService.salvar(tarefa);
+        return ResponseEntity.status(201).body(novaTarefa);
     }
 
     @PutMapping("/{id}")
-    public Tarefa atualizar(@PathVariable Long id, @RequestBody Tarefa tarefaAtualizada) {
-        Tarefa tarefa = tarefaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada"));
-
-        tarefa.setTitulo(tarefaAtualizada.getTitulo());
-        tarefa.setMateria(tarefaAtualizada.getMateria());
-        tarefa.setDataEntrega(tarefaAtualizada.getDataEntrega());
-        if (tarefaAtualizada.getConcluida() != null) {
-            tarefa.setConcluida(tarefaAtualizada.getConcluida());
-        }
-        return tarefaRepository.save(tarefa);
+    public ResponseEntity<Tarefa> atualizar(@PathVariable Long id, @RequestBody Tarefa tarefaAtualizada) {
+        Tarefa tarefa = tarefaService.atualizar(id, tarefaAtualizada);
+        return ResponseEntity.ok(tarefa);
     }
 
     @DeleteMapping("/{id}")
-    public void deletar(@PathVariable Long id) {
-        tarefaRepository.deleteById(id);
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+         tarefaService.deletar(id);
+         return ResponseEntity.noContent().build();
     }
 }
