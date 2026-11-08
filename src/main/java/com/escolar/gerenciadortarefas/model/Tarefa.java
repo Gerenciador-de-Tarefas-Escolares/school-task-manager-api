@@ -1,11 +1,13 @@
 package com.escolar.gerenciadortarefas.model;
 
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tarefa")
@@ -15,24 +17,42 @@ import java.time.LocalDate;
 public class Tarefa {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "tarefa_seq")
+    @SequenceGenerator(name = "tarefa_seq", sequenceName = "tarefa_seq", allocationSize = 50)
     private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "cadastro_id", nullable = false)
+    @JsonIgnore
+    private Usuario usuario;
+
+    @Column(name = "materia_id")
+    private Long materiaId;
 
     @Column(nullable = false)
     private String titulo;
 
-    @Column(nullable = false)
-    private String materia;
+    private String descricao;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "data_entrega", nullable = false)
+    private LocalDateTime dataEntrega;
 
     @Column(nullable = false)
-    private LocalDate dataEntrega;
+    private String prioridade = "MEDIA";
 
     @Column(nullable = false)
-    private Boolean concluida;
+    private String status = "PENDENTE";
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "usuario_id", nullable = false)
-    @JsonIgnore
-    private Usuario usuario;
+    @Column(name = "data_conclusao")
+    private LocalDateTime dataConclusao;
+
+    @Column(name = "data_criacao", updatable = false)
+    private LocalDateTime dataCriacao;
+
+    @PrePersist
+    public void prePersist() {
+        this.dataCriacao = LocalDateTime.now();
+    }
 
 }

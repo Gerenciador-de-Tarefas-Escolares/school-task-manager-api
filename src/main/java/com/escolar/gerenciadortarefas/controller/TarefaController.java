@@ -1,9 +1,11 @@
 package com.escolar.gerenciadortarefas.controller;
 
+import com.escolar.gerenciadortarefas.dto.TarefaDTO;
 import com.escolar.gerenciadortarefas.model.Tarefa;
 import com.escolar.gerenciadortarefas.model.Usuario;
 import com.escolar.gerenciadortarefas.repository.UsuarioRepository;
 import com.escolar.gerenciadortarefas.service.TarefaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -31,19 +33,18 @@ public class TarefaController {
     }
 
     @PostMapping
-    public ResponseEntity<Tarefa> cadastrar(@RequestBody Tarefa tarefa, @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<Tarefa> cadastrar(@Valid @RequestBody TarefaDTO tarefaDTO, @AuthenticationPrincipal UserDetails userDetails) {
         Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        tarefa.setUsuario(usuario);
-        Tarefa novaTarefa = tarefaService.salvar(tarefa);
+        Tarefa novaTarefa = tarefaService.salvar(tarefaDTO, usuario);
         return ResponseEntity.status(201).body(novaTarefa);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Tarefa> atualizar(@PathVariable Long id, @RequestBody Tarefa tarefaAtualizada) {
-        Tarefa tarefa = tarefaService.atualizar(id, tarefaAtualizada);
-        return ResponseEntity.ok(tarefa);
+    public ResponseEntity<Tarefa> atualizar(@PathVariable Long id, @Valid @RequestBody TarefaDTO tarefaDTO) {
+        Tarefa tarefaAtualizada = tarefaService.atualizar(id, tarefaDTO);
+        return ResponseEntity.ok(tarefaAtualizada);
     }
 
     @DeleteMapping("/{id}")
