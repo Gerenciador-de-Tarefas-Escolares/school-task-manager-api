@@ -1,5 +1,6 @@
 package com.escolar.gerenciadortarefas.service;
 
+import com.escolar.gerenciadortarefas.dto.TarefaDTO;
 import com.escolar.gerenciadortarefas.model.Tarefa;
 import com.escolar.gerenciadortarefas.model.Usuario;
 import com.escolar.gerenciadortarefas.repository.TarefaRepository;
@@ -10,7 +11,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,9 +40,7 @@ class TarefaServiceTest {
         tarefa = new Tarefa();
         tarefa.setId(1L);
         tarefa.setTitulo("Estudar Spring Boot");
-        tarefa.setMateria("Programação");
-        tarefa.setDataEntrega(LocalDate.now().plusDays(1));
-        tarefa.setConcluida(false);
+        tarefa.setStatus("PENDENTE");
         tarefa.setUsuario(usuario);
     }
 
@@ -59,19 +57,19 @@ class TarefaServiceTest {
     }
 
     @Test
-    void deveSalvarTarefaAtribuindoConcluidaFalseNula() {
-        when(tarefaRepository.save(any(Tarefa.class))).thenReturn(tarefa);
+    void deveSalvarTarefaDefinindoStatusPendenteQuandoNaoConcluida() {
+        when(tarefaRepository.save(any(Tarefa.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Tarefa novaTarefa = new Tarefa();
-        novaTarefa.setTitulo("Criar documentação");
-        novaTarefa.setMateria("Arquitetura");
-        novaTarefa.setDataEntrega(LocalDate.now());
-        novaTarefa.setConcluida(null);
+        TarefaDTO dto = new TarefaDTO();
+        dto.setTitulo("Criar documentação");
+        dto.setDescricao("Arquitetura");
+        dto.setConcluida(false);
 
-        Tarefa resultado = tarefaService.salvar(novaTarefa);
+        Tarefa resultado = tarefaService.salvar(dto, usuario);
 
         assertNotNull(resultado);
-        assertFalse(resultado.getConcluida());
+        assertEquals("PENDENTE", resultado.getStatus());
+        assertEquals(usuario, resultado.getUsuario());
         verify(tarefaRepository, times(1)).save(any(Tarefa.class));
     }
 

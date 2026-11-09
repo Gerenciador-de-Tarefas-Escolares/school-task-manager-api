@@ -1,5 +1,6 @@
 package com.escolar.gerenciadortarefas.controller;
 
+import com.escolar.gerenciadortarefas.dto.TarefaDTO;
 import com.escolar.gerenciadortarefas.model.Tarefa;
 import com.escolar.gerenciadortarefas.model.Usuario;
 import com.escolar.gerenciadortarefas.repository.UsuarioRepository;
@@ -83,9 +84,7 @@ class TarefaControllerTest {
         Tarefa tarefa = new Tarefa();
         tarefa.setId(4L);
         tarefa.setTitulo("Estudar Spring Boot");
-        tarefa.setMateria("Programação");
-        tarefa.setDataEntrega(LocalDate.now());
-        tarefa.setConcluida(false);
+        tarefa.setStatus("PENDENTE");
 
         when(tarefaService.listarPorUsuario(4L)).thenReturn(List.of(tarefa));
 
@@ -98,24 +97,23 @@ class TarefaControllerTest {
     void deveCriarTarefaComSucesso() throws Exception {
         simularUtilizadorLogado();
 
-        Tarefa novaTarefa = new Tarefa();
-        novaTarefa.setTitulo("Criar Testes Unitários");
-        novaTarefa.setMateria("Qualidade de Software");
-        novaTarefa.setDataEntrega(LocalDate.now().plusDays(2));
-        novaTarefa.setConcluida(false);
+        TarefaDTO dto = new TarefaDTO();
+        dto.setTitulo("Criar Testes Unitários");
+        dto.setDescricao("Qualidade de Software");
+        dto.setDataEntrega(LocalDate.now().plusDays(2).atStartOfDay());
+        dto.setStatus("PENDENTE");
 
         Tarefa tarefaSalva = new Tarefa();
         tarefaSalva.setId(10L);
-        tarefaSalva.setTitulo(novaTarefa.getTitulo());
-        tarefaSalva.setMateria(novaTarefa.getMateria());
-        tarefaSalva.setDataEntrega(novaTarefa.getDataEntrega());
-        tarefaSalva.setConcluida(novaTarefa.getConcluida());
+        tarefaSalva.setTitulo(dto.getTitulo());
+        tarefaSalva.setDescricao(dto.getDescricao());
+        tarefaSalva.setStatus("PENDENTE");
 
-        when(tarefaService.salvar(any(Tarefa.class))).thenReturn(tarefaSalva);
+        when(tarefaService.salvar(any(TarefaDTO.class),any(Usuario.class))).thenReturn(tarefaSalva);
 
         mockMvc.perform(post("/api/tarefas")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(novaTarefa)))
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(10L))
                 .andExpect(jsonPath("$.titulo").value("Criar Testes Unitários"));
@@ -123,21 +121,25 @@ class TarefaControllerTest {
 
     @Test
     void deveAtualizarTarefaComSucesso() throws Exception {
+        TarefaDTO dto = new TarefaDTO();
+        dto.setTitulo("Estudar Spring Boot Avançado");
+        dto.setConcluida(true);
+        dto.setStatus("CONCLUIDA");
+        dto.setDataEntrega(LocalDate.now().plusDays(2).atStartOfDay());
+
         Tarefa tarefaAtualizada = new Tarefa();
         tarefaAtualizada.setId(1L);
         tarefaAtualizada.setTitulo("Estudar Spring Boot Avançado");
-        tarefaAtualizada.setMateria("Programação");
-        tarefaAtualizada.setDataEntrega(LocalDate.now().plusDays(1));
-        tarefaAtualizada.setConcluida(true);
+        tarefaAtualizada.setStatus("CONCLUIDA");
 
-        when(tarefaService.atualizar(eq(1L), any(Tarefa.class))).thenReturn(tarefaAtualizada);
+        when(tarefaService.atualizar(eq(1L), any(TarefaDTO.class))).thenReturn(tarefaAtualizada);
 
         mockMvc.perform(put("/api/tarefas/1")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(tarefaAtualizada)))
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.titulo").value("Estudar Spring Boot Avançado"))
-                .andExpect(jsonPath("$.concluida").value(true));
+                .andExpect(jsonPath("$.status").value("CONCLUIDA"));
     }
 
     @Test
