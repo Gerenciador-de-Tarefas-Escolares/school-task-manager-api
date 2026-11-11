@@ -1,44 +1,51 @@
 package com.escolar.gerenciadortarefas.service;
 
+import com.escolar.gerenciadortarefas.model.Usuario;
+import com.escolar.gerenciadortarefas.security.UsuarioUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.util.ReflectionTestUtils;
-
-import java.util.ArrayList;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class JwtServiceTest {
 
     private JwtService jwtService;
-    private UserDetails userDetails;
+    private UsuarioUserDetails userDetails;
 
     @BeforeEach
     void setUp() {
         jwtService = new JwtService();
+        ReflectionTestUtils.setField(jwtService, "secretKey", "404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970");
+        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 3600000L);
 
-        ReflectionTestUtils.setField(jwtService, "secretKey",  "404E635266556A586e3272357538782F413f4428472B4B6250645367566B5970");
-        ReflectionTestUtils.setField(jwtService, "jwtExpiration", 86400000L);
+        Usuario usuario = new Usuario();
+        usuario.setId(1L);
+        usuario.setNome("Sofia");
+        usuario.setEmail("sofia@teste.com");
+        usuario.setSenha("123456");
 
-        userDetails = new User("rebeca@email.com", "senha123", new ArrayList<>());
+        userDetails = new UsuarioUserDetails(usuario);
     }
 
     @Test
-    void deveGerarEExtrairUsernameDoToken() {
-        String token =jwtService.gerarToken(userDetails);
+    void deveGerarEValidarTokenCorretamente() {
+        String token = jwtService.generateToken(userDetails);
 
         assertNotNull(token);
-        String usernameExtraido = jwtService.extrairUsername(token);
-        assertEquals("rebeca@email.com", usernameExtraido);
+        assertEquals("sofia@teste.com", jwtService.extrairUsername(token));
+        assertTrue(jwtService.validarToken(token, userDetails));
     }
 
     @Test
-    void deveValidarTokenComSucesso() {
-        String token = jwtService.gerarToken(userDetails);
+    void deveInvalidarTokenParaOutroUsuario() {
+        String token = jwtService.generateToken(userDetails);
 
-        Boolean isValid = jwtService.validarToken(token, userDetails);
-        assertTrue(isValid);
+        Usuario outroUsuario = new Usuario();
+        outroUsuario.setEmail("outro@teste.com");
+        outroUsuario.setSenha("123456");
+        UsuarioUserDetails outroUserDetails = new UsuarioUserDetails(outroUsuario);
+
+        assertFalse(jwtService.validarToken(token, outroUserDetails));
     }
 }
