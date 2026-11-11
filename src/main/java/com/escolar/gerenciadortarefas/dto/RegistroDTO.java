@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 public class RegistroDTO {
@@ -17,4 +19,7 @@ public class RegistroDTO {
 
     @NotBlank(message = "A senha é obrigatória")
     private String senha;
+
+    private String telefone;
+    private LocalDate dataNascimento;
 }
