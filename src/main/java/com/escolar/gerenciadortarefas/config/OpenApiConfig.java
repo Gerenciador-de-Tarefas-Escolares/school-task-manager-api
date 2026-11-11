@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "API do Gerencidor de Tarefas Escolares",
+                title = "API do Gerenciador de Tarefas Escolares",
                 version = "1.0",
                 description = "Documentação dos endpoints da aplicação com suporte a JWT e OAuth2"
         )
