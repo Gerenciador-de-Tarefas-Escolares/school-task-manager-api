@@ -1,12 +1,16 @@
 package com.escolar.gerenciadortarefas.service;
 
 import com.escolar.gerenciadortarefas.dto.TarefaDTO;
+import com.escolar.gerenciadortarefas.model.Materia;
 import com.escolar.gerenciadortarefas.model.Tarefa;
 import com.escolar.gerenciadortarefas.model.Usuario;
+import com.escolar.gerenciadortarefas.repository.MateriaRepository;
 import com.escolar.gerenciadortarefas.repository.TarefaRepository;
+import com.escolar.gerenciadortarefas.security.UsuarioUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,69 +19,110 @@ import java.util.List;
 public class TarefaService {
 
     private final TarefaRepository tarefaRepository;
+    private final MateriaRepository materiaRepository;
 
-    public List<Tarefa> listarPorUsuario(Long usuarioId) {
-        return tarefaRepository.findByUsuarioId(usuarioId);
+    private Usuario getUsuarioLogado() {
+        UsuarioUserDetails userDetails = (UsuarioUserDetails) SecurityContextHolder
+                .getContext()
+                .getAuthentication()
+                .getPrincipal();
+        return userDetails.getUsuario();
     }
 
-    public Tarefa buscarPorId(Long id) {
-        return tarefaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada: " + id));
-    }
+    @Transactional
+    public Tarefa salvar(TarefaDTO dto) {
+        Usuario usuarioLogado = getUsuarioLogado();
 
-    public Tarefa salvar(TarefaDTO dto, Usuario usuario) {
         Tarefa tarefa = new Tarefa();
+        tarefa.setUsuario(usuarioLogado);
         tarefa.setTitulo(dto.getTitulo());
         tarefa.setDescricao(dto.getDescricao());
         tarefa.setDataEntrega(dto.getDataEntrega());
-        tarefa.setUsuario(usuario);
+        tarefa.setPrioridade(dto.getPrioridade() != null ? dto.getPrioridade() : "MEDIA");
+        tarefa.setStatus("PENDENTE");
+        tarefa.setDataCriacao(LocalDateTime.now());
 
-        if (dto.getMateriaId() != null) {
-            tarefa.setMateriaId(dto.getMateriaId());
+        vincularMateria(tarefa, dto, usuarioLogado);
+
+        return tarefaRepository.save(tarefa);
+    }
+
+    @Transactional
+    public Tarefa atualizar(Long id, TarefaDTO dto) {
+        Usuario usuarioLogado = getUsuarioLogado();
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
+
+        if (!tarefa.getUsuario().getId().equals(usuarioLogado.getId())) {
+            throw new RuntimeException("Acesso negado a esta tarefa.");
         }
 
-        tarefa.setPrioridade(dto.getPrioridade() != null ? dto.getPrioridade() : "MEDIA");
+        if (dto.getTitulo() != null) tarefa.setTitulo(dto.getTitulo());
+        if (dto.getDescricao() != null) tarefa.setDescricao(dto.getDescricao());
+        if (dto.getDataEntrega() != null) tarefa.setDataEntrega(dto.getDataEntrega());
+        if (dto.getPrioridade() != null) tarefa.setPrioridade(dto.getPrioridade());
 
-        if ("CONCLUIDA".equalsIgnoreCase(dto.getStatus()) || (dto.getConcluida() != null && dto.getConcluida())) {
-            tarefa.setStatus("CONCLUIDA");
+        if (dto.getStatus() != null) {
+            tarefa.setStatus(dto.getStatus());
+            if ("CONCLUIDA".equals(dto.getStatus())) {
+                tarefa.setDataConclusao(LocalDateTime.now());
+            } else {
+                tarefa.setDataConclusao(null);
+            }
+        }
+
+        vincularMateria(tarefa, dto, usuarioLogado);
+
+        return tarefaRepository.save(tarefa);
+    }
+
+    private void vincularMateria(Tarefa tarefa, TarefaDTO dto, Usuario usuarioLogado) {
+        if (dto.getNovaMateriaNome() != null && !dto.getNovaMateriaNome().trim().isEmpty()) {
+            Materia novaMateria = new Materia();
+            novaMateria.setUsuario(usuarioLogado);
+            novaMateria.setNome(dto.getNovaMateriaNome().trim());
+            novaMateria.setCor("#3b82f6");
+
+            Materia materiaSalva = materiaRepository.save(novaMateria);
+            tarefa.setMateria(materiaSalva);
+        } else if (dto.getMateriaId() != null) {
+            Materia materiaExistente = materiaRepository.findById(dto.getMateriaId())
+                    .orElseThrow(() -> new RuntimeException("Matéria escolar não encontrada no banco de dados."));
+            tarefa.setMateria(materiaExistente);
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<Tarefa> listarTodas() {
+        return tarefaRepository.findByUsuarioId(getUsuarioLogado().getId());
+    }
+
+    @Transactional
+    public Tarefa atualizarStatus(Long id, String novoStatus) {
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
+
+        tarefa.setStatus(novoStatus);
+
+        if ("CONCLUIDA".equals(novoStatus)) {
             tarefa.setDataConclusao(LocalDateTime.now());
         } else {
-            tarefa.setStatus("PENDENTE");
+            tarefa.setDataConclusao(null);
         }
 
         return tarefaRepository.save(tarefa);
     }
 
-    public Tarefa atualizar(Long id, TarefaDTO dto) {
-        Tarefa tarefaExistente = buscarPorId(id);
-
-        tarefaExistente.setTitulo(dto.getTitulo());
-        tarefaExistente.setDescricao(dto.getDescricao());
-        tarefaExistente.setDataEntrega(dto.getDataEntrega());
-
-        if (dto.getMateriaId() != null) {
-            tarefaExistente.setMateriaId(dto.getMateriaId());
-        }
-
-        if (dto.getPrioridade() != null) {
-            tarefaExistente.setPrioridade(dto.getPrioridade());
-        }
-
-        if ("CONCLUIDA".equalsIgnoreCase(dto.getStatus()) || (dto.getConcluida() != null && dto.getConcluida())) {
-            tarefaExistente.setStatus("CONCLUIDA");
-            if (tarefaExistente.getDataConclusao() == null) {
-                tarefaExistente.setDataConclusao(LocalDateTime.now());
-            }
-        } else {
-            tarefaExistente.setStatus("PENDENTE");
-            tarefaExistente.setDataConclusao(null);
-        }
-
-        return tarefaRepository.save(tarefaExistente);
-    }
-
+    @Transactional
     public void deletar(Long id) {
-        Tarefa tarefa = buscarPorId(id);
+        Usuario usuarioLogado = getUsuarioLogado();
+        Tarefa tarefa = tarefaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Tarefa não encontrada."));
+
+        if (!tarefa.getUsuario().getId().equals(usuarioLogado.getId())) {
+            throw new RuntimeException("Acesso negado a esta tarefa.");
+        }
+
         tarefaRepository.delete(tarefa);
     }
 }

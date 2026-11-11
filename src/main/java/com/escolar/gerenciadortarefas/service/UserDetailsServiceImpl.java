@@ -2,14 +2,12 @@ package com.escolar.gerenciadortarefas.service;
 
 import com.escolar.gerenciadortarefas.model.Usuario;
 import com.escolar.gerenciadortarefas.repository.UsuarioRepository;
+import com.escolar.gerenciadortarefas.security.UsuarioUserDetails;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -18,10 +16,12 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private final UsuarioRepository usuarioRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + email));
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        String emailNormalizado = username != null ? username.trim().toLowerCase() : "";
 
-        return new User(usuario.getEmail(), usuario.getSenha(), new ArrayList<>());
+        Usuario usuario = usuarioRepository.findByEmailIgnoreCase(emailNormalizado)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o e-mail: " + username));
+
+        return new UsuarioUserDetails(usuario);
     }
 }
