@@ -2,54 +2,45 @@ package com.escolar.gerenciadortarefas.controller;
 
 import com.escolar.gerenciadortarefas.dto.TarefaDTO;
 import com.escolar.gerenciadortarefas.model.Tarefa;
-import com.escolar.gerenciadortarefas.model.Usuario;
-import com.escolar.gerenciadortarefas.repository.UsuarioRepository;
 import com.escolar.gerenciadortarefas.service.TarefaService;
-import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/tarefas")
-@CrossOrigin(origins = "http://localhost:5173")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
+@Tag(name = "Tarefas", description = "Gerenciamento das tarefas escolares do usuário autenticado")
 public class TarefaController {
 
     private final TarefaService tarefaService;
-    private final UsuarioRepository usuarioRepository;
 
-    @GetMapping
-    public ResponseEntity<List<Tarefa>> listar(@AuthenticationPrincipal UserDetails userDetails) {
-        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        List<Tarefa> tarefas = tarefaService.listarPorUsuario(usuario.getId());
-        return ResponseEntity.ok(tarefas);
-    }
-
+    @Operation(summary = "Criar tarefa", description = "Cria uma nova tarefa vinculada ao usuário autenticado")
     @PostMapping
-    public ResponseEntity<Tarefa> cadastrar(@Valid @RequestBody TarefaDTO tarefaDTO, @AuthenticationPrincipal UserDetails userDetails) {
-        Usuario usuario = usuarioRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-        Tarefa novaTarefa = tarefaService.salvar(tarefaDTO, usuario);
-        return ResponseEntity.status(201).body(novaTarefa);
+    public ResponseEntity<Tarefa> criar(@RequestBody TarefaDTO dto) {
+        return ResponseEntity.ok(tarefaService.salvar(dto));
     }
 
+    @Operation(summary = "Listar tarefas", description = "Retorna todas as tarefas do usuário autenticado")
+    @GetMapping
+    public ResponseEntity<List<Tarefa>> listar() {
+        return ResponseEntity.ok(tarefaService.listarTodas());
+    }
+
+    @Operation(summary = "Atualizar tarefa", description = "Atualiza dados ou status de conclusão de uma tarefa existente")
     @PutMapping("/{id}")
-    public ResponseEntity<Tarefa> atualizar(@PathVariable Long id, @Valid @RequestBody TarefaDTO tarefaDTO) {
-        Tarefa tarefaAtualizada = tarefaService.atualizar(id, tarefaDTO);
-        return ResponseEntity.ok(tarefaAtualizada);
+    public ResponseEntity<Tarefa> atualizar(@PathVariable Long id, @RequestBody TarefaDTO dto) {
+        return ResponseEntity.ok(tarefaService.atualizar(id, dto));
     }
 
+    @Operation(summary = "Excluir tarefa", description = "Remove uma tarefa pelo ID")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
-         tarefaService.deletar(id);
-         return ResponseEntity.noContent().build();
+        tarefaService.deletar(id);
+        return ResponseEntity.noContent().build();
     }
 }
