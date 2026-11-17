@@ -16,7 +16,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @Tag(name = "Autenticação", description = "Endpoints públicos para login tradicional, registro e autenticação via Google")
 public class UsuarioController {
 
@@ -46,7 +45,6 @@ public class UsuarioController {
         String servidorGoogle = "oauth2." + "googleapis.com";
         String rotaValidacao = "/tokeninfo" + "?id_token=";
         String urlVerificacao = "https://" + servidorGoogle + rotaValidacao + tokenDTO.getIdToken();
-
 
         try {
             System.out.println("[Google Auth]: Iniciando handshake de validação com o endpoint do Google...");

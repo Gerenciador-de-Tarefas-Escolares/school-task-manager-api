@@ -14,7 +14,6 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @Tag(name = "Conta do Usuário", description = "Endpoints para recuperação de senha e exclusão de conta")
 public class ContaController {
 

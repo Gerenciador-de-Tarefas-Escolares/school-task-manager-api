@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/materias")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @Tag(name = "Matérias", description = "Consulta das matérias escolares cadastradas pelo usuário")
 public class MateriaController {
 

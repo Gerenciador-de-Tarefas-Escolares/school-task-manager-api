@@ -13,7 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tarefas")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "http://localhost:5173", allowedHeaders = "*", allowCredentials = "true")
 @Tag(name = "Tarefas", description = "Gerenciamento das tarefas escolares do usuário autenticado")
 public class TarefaController {
 
