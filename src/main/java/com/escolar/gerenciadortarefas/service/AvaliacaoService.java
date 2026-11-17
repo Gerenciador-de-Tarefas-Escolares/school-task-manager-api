@@ -13,10 +13,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class AvaliacaoService {
+
+    private static final Set<String> TIPOS_VALIDOS_BANCO = Set.of("PROVA", "TESTE", "EXAME", "OUTRO");
 
     private final AvaliacaoRepository avaliacaoRepository;
     private final MateriaRepository materiaRepository;
@@ -36,7 +39,7 @@ public class AvaliacaoService {
         Avaliacao avaliacao = Avaliacao.builder()
                 .titulo(dto.titulo())
                 .descricao(dto.descricao())
-                .tipo(dto.tipo().toUpperCase())
+                .tipo(normalizarTipo(dto.tipo()))
                 .dataAvaliacao(dto.dataAvaliacao())
                 .nota(dto.nota())
                 .notaMaxima(dto.notaMaxima() != null ? dto.notaMaxima() : new BigDecimal("10.00"))
@@ -57,7 +60,7 @@ public class AvaliacaoService {
 
         avaliacao.setTitulo(dto.titulo());
         avaliacao.setDescricao(dto.descricao());
-        avaliacao.setTipo(dto.tipo().toUpperCase());
+        avaliacao.setTipo(normalizarTipo(dto.tipo()));
         avaliacao.setDataAvaliacao(dto.dataAvaliacao());
         avaliacao.setNota(dto.nota());
         if (dto.notaMaxima() != null) {
@@ -75,6 +78,14 @@ public class AvaliacaoService {
         avaliacaoRepository.delete(avaliacao);
     }
 
+    private String normalizarTipo(String tipo) {
+        if (tipo == null || tipo.isBlank()) {
+            return "PROVA";
+        }
+        String upper = tipo.trim().toUpperCase();
+        return TIPOS_VALIDOS_BANCO.contains(upper) ? upper : "OUTRO";
+    }
+
     private Materia resolverMateria(Long materiaId, String novaMateriaNome, Usuario usuario) {
         if (novaMateriaNome != null && !novaMateriaNome.isBlank()) {
             Materia nova = new Materia();
@@ -87,6 +98,14 @@ public class AvaliacaoService {
             return materiaRepository.findByIdAndUsuarioId(materiaId, usuario.getId())
                     .orElseThrow(() -> new RuntimeException("Matéria escolar não encontrada no banco de dados."));
         }
-        return null;
+        return materiaRepository.findByUsuarioId(usuario.getId()).stream()
+                .findFirst()
+                .orElseGet(() -> {
+                    Materia geral = new Materia();
+                    geral.setNome("Geral");
+                    geral.setCor("#8b5cf6");
+                    geral.setUsuario(usuario);
+                    return materiaRepository.save(geral);
+                });
     }
 }
