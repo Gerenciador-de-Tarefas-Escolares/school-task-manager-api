@@ -12,6 +12,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Service
@@ -34,8 +35,8 @@ public class AutentificacaoService {
         novoUsuario.setNome(dto.getNome());
         novoUsuario.setEmail(emailNormalizado);
         novoUsuario.setSenha(passwordEncoder.encode(dto.getSenha()));
-        novoUsuario.setTelefone(dto.getTelefone());
-        novoUsuario.setDataNascimento(dto.getDataNascimento());
+        novoUsuario.setTelefone(dto.getTelefone() != null ? dto.getTelefone() : "");
+        novoUsuario.setDataNascimento(dto.getDataNascimento() != null ? dto.getDataNascimento() : LocalDate.of(2000, 1, 1));
 
         Usuario usuarioSalvo = usuarioRepository.save(novoUsuario);
         UsuarioUserDetails userDetails = new UsuarioUserDetails(usuarioSalvo);
@@ -75,6 +76,8 @@ public class AutentificacaoService {
                     novo.setNome(nome);
                     novo.setEmail(emailNormalizado);
                     novo.setSenha(passwordEncoder.encode(UUID.randomUUID().toString()));
+                    novo.setTelefone("");
+                    novo.setDataNascimento(LocalDate.of(2000, 1, 1));
                     return usuarioRepository.save(novo);
                 });
 
