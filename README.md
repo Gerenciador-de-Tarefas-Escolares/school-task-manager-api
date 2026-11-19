@@ -4,12 +4,14 @@ API RESTful desenvolvida em **Java 21** e **Spring Boot 3** para o gerenciamento
 
 ---
 
-## 🌐 Acesso Online (Deploy em Produção)
+## 🌐 Acesso Online e Gestão do Projeto
 
 * **Documentação Interativa (Swagger UI):** https://school-task-manager-api.onrender.com/swagger-ui/index.html
 * **Especificação OpenAPI 3 (JSON):** https://school-task-manager-api.onrender.com/v3/api-docs
-* **Aplicação Web (Front-end):** https://school-task-manager-front.vercel.app
-* **Repositório do Banco de Dados (PostgreSQL + Docker):** https://github.com/Gerenciador-de-Tarefas-Escolares/Gerenciador-tarefa-banco.git
+* **Aplicação Web (Front-end — Vercel):** https://school-task-manager-front.vercel.app
+* **Repositório do Front-end (React + Vite):** https://github.com/Gerenciador-de-Tarefas-Escolares/school-task-manager-front
+* **Repositório do Banco de Dados (PostgreSQL + Docker):** https://github.com/Gerenciador-de-Tarefas-Escolares/Gerenciador-tarefa-banco
+* **Planejamento Ágil (Kanban — GitHub Projects):** https://github.com/users/AlefPereiraSilva/projects/1/views/1
 
 > **Nota para avaliação:** O servidor está hospedado em plano gratuito (Render) e entra em modo de suspensão após 15 minutos sem uso. Caso a primeira requisição demore cerca de 30 a 50 segundos, aguarde o carregamento inicial.
 
